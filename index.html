@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name = "viewport" content = "width=device-width, minimum-scale=1.0, maximum-scale = 1.0, user-scalable = no">
+  <title>亲爱的，晚安～❤️</title>
+  <style>
+    *{
+      padding: 0;margin: 0;
+      text-decoration: none;
+    }
+    body{
+      position: fixed;
+      top:0;
+      bottom: 0;
+      left:0;
+      right:0;
+      user-select: none;
+      background: black;
+    }
+    #snakeboardout {
+      position: fixed;
+      top: 2%;
+      left: 2.5%;
+      width: 400px;
+      height: 400px;
+    }
+    #score {
+      position: fixed;
+      top: 80%;
+      left: 70%;
+      text-align: center;
+      font-size: 20px;
+      color: grey;
+    }
+    #out {
+      position: fixed;
+      bottom: 2%;
+      left: 2%;
+      height: 30%;
+      width: 60%;
+
+    }
+    .one{
+      height:33.33%;
+      display:flex;
+      justify-content:space-evenly;
+    }
+    .one span{
+      width:33.33%;
+    }
+    #snakeboardout .up{
+      position: absolute;
+      top:0;
+      bottom:70%;
+      right:30%;
+      left:30%;
+    }
+    #snakeboardout .right{
+      position: absolute;
+      top:30%;
+      bottom:30%;
+      right:0;
+      left:70%;
+    }
+    #snakeboardout .left{
+      position: absolute;
+      top:30%;
+      bottom:30%;
+      right:70%;
+      left:0;
+    }
+    #snakeboardout .down{
+      position: absolute;
+      top:70%;
+      bottom:0;
+      right:30%;
+      left:30%;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+</head>
+<script>
+  let img = new Image()
+  img.src = "a.jpg"
+</script>
+<body>
+  <div id="score">0</div>
+  <div id="snakeboardout">
+    <canvas id="snakeboard" class="move" width="400" height="400">
+    </canvas>
+    <div class="up"></div>
+    <div class="right"></div>
+    <div class="left"></div>
+    <div class="down"></div>
+  </div>
+  <div id="out">
+    <div class="one">
+      <span></span>
+      <span class="up" style="background:green"></span>
+      <span></span>
+    </div>
+    <div class="one">
+      <span class="left" style="background:green"></span>
+      <span class="move" style="background:red"></span>
+      <span class="right" style="background:green"></span>
+    </div>
+    <div class="one">
+      <span></span>
+      <span class="down" style="background:green"></span>
+      <span></span>
+    </div>
+  </div>
+
+</body>
+
+<script>
+
+  const board_border = 'blue';
+  const board_background = "black";
+  const snake_col = 'lightblue';
+  const snake_border = 'darkblue';
+  let unit = 80
+  let head_color = "blue"
+  let width = (window.innerWidth > 0) ? window.innerWidth : screen.width
+  let eaten = false
+  width = width * 0.95
+  if(width <400){
+    $("#snakeboardout").css("transform","scale("+width/400+")")
+    $("#snakeboardout").css("transform-origin","top left")
+  }
+
+
+  let snake = [{x: 80, y: 80}]
+
+  let score = 0;
+
+// Horizontal velocity
+let food_x;
+let food_y;
+let dx = unit;
+// Vertical velocity
+let dy = 0;
+
+// Get the canvas element
+const snakeboard = document.getElementById("snakeboard");
+// Return a two dimensional drawing context
+const snakeboard_ctx = snakeboard.getContext("2d");
+document.addEventListener("keydown", change_direction);
+var keep = false
+// main function called repeatedly to keep the game running
+function main() {
+  if (has_game_ended(snake[0].x + dx, snake[0].y + dy)) return;
+//
+clear_board();
+move_snake();
+drawFood();
+drawSnake();
+if(keep){
+  setTimeout(main, 20)
+}
+}
+let color_max = [100,120,140]
+let color_min = [0,0,0]
+let rgb=[random(color_max[0]),random(color_max[1]),random(color_max[2])]
+let tf=[true,false]
+let rgb_d = [tf[random(1)],tf[random(1)],tf[random(1)]]
+
+function change_color(){
+  
+  if(rgb[0]>=color_max[0])rgb_d[0]=false;
+  if(rgb[0]<=color_min[0])rgb_d[0]=true;
+  if(rgb_d[0])rgb[0]=rgb[0]+random(1);
+  else rgb[0]=rgb[0]-random(1);
+  
+  if(rgb[1]>=color_max[0])rgb_d[1]=false;
+  if(rgb[1]<=color_min[0])rgb_d[1]=true;
+  if(rgb_d[1])rgb[1]=rgb[1]+random(1);
+  else rgb[1]=rgb[1]-random(1);
+  
+  if(rgb[2]>=color_max[0])rgb_d[2]=false;
+  if(rgb[2]<=color_min[0])rgb_d[2]=true;
+  if(rgb_d[2])rgb[2]=rgb[2]+random(1);
+  else rgb[2]=rgb[2]-random(1);
+  
+  
+  
+  head_color = "rgb("+rgb[0]+","+rgb[1]+","+rgb[2]+")"
+  drawHead()
+  setTimeout(change_color,50)
+}
+
+change_color()
+
+// draw a border around the canvas
+function clear_board() {
+// Draw a "border" around the entire canvas
+snakeboard_ctx.drawImage(img,0, 0, snakeboard.width, snakeboard.height);
+}
+clear_board()
+// Draw the snake on the canvas
+function drawSnake() {
+// Draw each part
+drawHead()
+snake.slice(1).forEach(drawSnakePart)
+}
+
+function drawFood() {
+  snakeboard_ctx.fillStyle = 'lightgreen';
+  snakeboard_ctx.strokestyle = 'darkgreen';
+  snakeboard_ctx.fillRect(food_x, food_y, unit, unit);
+  snakeboard_ctx.strokeRect(food_x, food_y, unit, unit);
+}
+function drawHead() {
+
+// Set the colour of the snake part
+snakeboard_ctx.fillStyle = head_color;
+// Set the border colour of the snake part
+snakeboard_ctx.strokeStyle = snake_border;
+// Draw a "filled" rectangle to represent the snake part at the coordinates
+// the part is located
+snakeboard_ctx.fillRect(snake[0].x, snake[0].y, unit, unit);
+// Draw a border around the snake part
+snakeboard_ctx.strokeRect(snake[0].x, snake[0].y, unit, unit);
+}
+// Draw one snake part
+function drawSnakePart(snakePart) {
+
+// Set the colour of the snake part
+snakeboard_ctx.fillStyle = snake_col;
+// Set the border colour of the snake part
+snakeboard_ctx.strokeStyle = snake_border;
+// Draw a "filled" rectangle to represent the snake part at the coordinates
+// the part is located
+snakeboard_ctx.fillRect(snakePart.x, snakePart.y, unit, unit);
+// Draw a border around the snake part
+snakeboard_ctx.strokeRect(snakePart.x, snakePart.y, unit, unit);
+}
+
+function has_game_ended(x,y) {
+  for (let i = 1; i < snake.length-1; i++) {
+    if (snake[i].x === x && snake[i].y === y) return true
+  }
+const hitLeftWall = x < 0;
+const hitRightWall = x > snakeboard.width - unit;
+const hitToptWall = y < 0;
+const hitBottomWall = y > snakeboard.height - unit;
+return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall
+}
+
+function random(max,min) {
+  if(typeof min !== "undefined") return Math.round(min+(Math.random() * (max-min)));
+  return Math.round((Math.random() * max));
+}
+
+function gen_food() {
+// Generate a random number the food x-coordinate
+// if the new food location is where the snake currently is, generate a new food location
+avaliable = []
+for(let i = 0; i<snakeboard.width/unit;i++){
+  for(let j = 0; j<snakeboard.width/unit;j++){
+    let taken = false
+    snake.forEach(function(part) {
+
+      taken = taken || part.x == i*unit && part.y == j*unit;
+
+    });
+    if (!taken) avaliable.unshift({x:i*unit,y:j*unit});
+  }
+}
+if(avaliable.length == 0){
+  unit = unit/2;
+  snake = [{x: 80, y: 80}]
+  img.src = "b.jpg"
+  return
+}
+
+let test = random(avaliable.length-1)
+food = avaliable[test]
+food_x = food.x;
+food_y = food.y;
+}
+$(".up").bind('touchstart',function(){
+  dx = 0;
+  dy = -unit;
+  main()
+  ontouch()
+})
+
+$(".left").bind('touchstart',function(){
+  dx = -unit;
+  dy = 0;
+  main() 
+  ontouch()
+})
+
+$(".right").bind('touchstart',function(){
+  dx = unit;
+  dy = 0;
+  main()
+  ontouch()
+})
+
+$(".down").bind('touchstart',function(){
+  dx = 0;
+  dy = unit;
+  main()
+  ontouch()
+})
+$(".move").bind('touchstart',function(){
+  move()
+})
+
+
+function move(){
+  keep = true
+  main()
+}
+function stop(){
+  keep = false
+}
+touch = false
+function ontouch(){
+  touch = true
+  setTimeout(function(){
+    if(touch){
+      move()
+    }
+  }, 100)
+}
+
+$("body").bind('touchend', function(){
+  touch = false
+  stop()
+})
+
+function change_direction(event) {
+  const LEFT_KEY = 37;
+  const RIGHT_KEY = 39;
+  const UP_KEY = 38;
+  const DOWN_KEY = 40;
+
+// Prevent the snake from reversing
+const keyPressed = event.keyCode;
+if (keyPressed === LEFT_KEY) {
+  dx = -unit;
+  dy = 0;
+}
+if (keyPressed === UP_KEY) {
+  dx = 0;
+  dy = -unit;
+}
+if (keyPressed === RIGHT_KEY) {
+  dx = unit;
+  dy = 0;
+}
+if (keyPressed === DOWN_KEY) {
+  dx = 0;
+  dy = unit;
+}
+main()
+}
+
+function move_snake() {
+// Create the new Snake's head
+const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+// Add the new head to the beginning of snake body
+snake.unshift(head);
+eaten = snake[0].x === food_x && snake[0].y === food_y;
+if (eaten) {
+// Increase score
+score += 10;
+// Display score on screen
+document.getElementById('score').innerHTML = score;
+// Generate new food location
+gen_food();
+} else {
+// Remove the last part of snake body
+snake.pop();
+}
+}
+document.addEventListener("DOMContentLoaded", function () {
+  pTag = document.querySelector("div");
+  newVal = document.createElement("p");
+  newVal.innerHTML = '';
+  pTag.appendChild(newVal);
+});
+gen_food()
+drawFood()
+drawSnake()
+
+</script>
+</html>
