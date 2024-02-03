@@ -96,17 +96,17 @@
   <div id="out">
     <div class="one">
       <span></span>
-      <span class="up" style="background:green"></span>
+      <span class="up" style="background:darkslateblue"></span>
       <span></span>
     </div>
     <div class="one">
-      <span class="left" style="background:green"></span>
-      <span class="move" style="background:red"></span>
-      <span class="right" style="background:green"></span>
+      <span class="left" style="background:darkslateblue"></span>
+      <span class="move" style="background:gray"></span>
+      <span class="right" style="background:darkslateblue"></span>
     </div>
     <div class="one">
       <span></span>
-      <span class="down" style="background:green"></span>
+      <span class="down" style="background:darkslateblue"></span>
       <span></span>
     </div>
   </div>
@@ -119,6 +119,8 @@
   const board_background = "black";
   const snake_col = 'lightblue';
   const snake_border = 'darkblue';
+  const food_color = 'blueviolet';
+  const food_border = 'darkgreen';
   let unit = 80
   let head_color = "blue"
   let width = (window.innerWidth > 0) ? window.innerWidth : screen.width
@@ -205,8 +207,8 @@ snake.slice(1).forEach(drawSnakePart)
 }
 
 function drawFood() {
-  snakeboard_ctx.fillStyle = 'lightgreen';
-  snakeboard_ctx.strokestyle = 'darkgreen';
+  snakeboard_ctx.fillStyle = food_color;
+  snakeboard_ctx.strokestyle = food_border;
   snakeboard_ctx.fillRect(food_x, food_y, unit, unit);
   snakeboard_ctx.strokeRect(food_x, food_y, unit, unit);
 }
